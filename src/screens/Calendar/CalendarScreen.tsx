@@ -3,6 +3,7 @@ import {
   STATUS_COLORS,
   STATUS_LABELS,
   BOOKING_STATUSES,
+  BOOKING_TYPE_LABELS,
   DEFAULT_INSURANCE_OMR,
   type Booking,
 } from '../../types';
@@ -10,13 +11,16 @@ import { useAppStore } from '../../store/AppStore';
 import {
   addDays,
   dayIsInBooking,
+  formatDisplayDate,
   formatMonthTitle,
   monthGridDays,
+  nightsBetween,
   startOfMonth,
   toIsoDate,
   todayIso,
   WEEKDAY_LABELS,
 } from '../../utils/dates';
+import { exportExcel, type CellValue } from '../../utils/exportExcel';
 import DayBookingsModal from './DayBookingsModal';
 import BookingForm, { type BookingFormData } from './BookingForm';
 
@@ -108,6 +112,46 @@ export default function CalendarScreen() {
     }
   };
 
+  const handleExport = () => {
+    const rows: CellValue[][] = [...bookings]
+      .sort((a, b) => a.checkInDate.localeCompare(b.checkInDate))
+      .map((booking) => [
+        booking.customerName,
+        booking.customerPhone,
+        booking.customerEmail,
+        BOOKING_TYPE_LABELS[booking.bookingType],
+        formatDisplayDate(booking.checkInDate),
+        formatDisplayDate(booking.checkOutDate),
+        nightsBetween(booking.checkInDate, booking.checkOutDate),
+        booking.price,
+        booking.insurancePrice,
+        STATUS_LABELS[booking.status],
+        booking.tags.join(', '),
+        booking.note,
+      ]);
+
+    exportExcel(`bookings-${todayIso()}`, [
+      {
+        name: 'Bookings',
+        headers: [
+          'Customer',
+          'Phone',
+          'Email',
+          'Type',
+          'Check-in',
+          'Check-out',
+          'Nights',
+          'Price (OMR)',
+          'Insurance (OMR)',
+          'Status',
+          'Tags',
+          'Note',
+        ],
+        rows,
+      },
+    ]);
+  };
+
   const monthValue = `${viewMonth.getFullYear()}-${String(
     viewMonth.getMonth() + 1,
   ).padStart(2, '0')}`;
@@ -116,6 +160,15 @@ export default function CalendarScreen() {
     <div>
       <div className="page-header">
         <h1 className="page-title">Bookings Calendar</h1>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            className="btn"
+            onClick={handleExport}
+            disabled={bookings.length === 0}
+          >
+            ⬇ Export Excel
+          </button>
+        </div>
       </div>
 
       <div className="calendar-toolbar">

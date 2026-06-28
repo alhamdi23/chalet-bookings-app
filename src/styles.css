@@ -1,15 +1,17 @@
 :root {
-  --bg: #0b1220;
-  --surface: #131c2e;
-  --surface-2: #1b273d;
-  --border: #26334d;
-  --text: #e8edf5;
-  --text-muted: #93a1b8;
-  --primary: #14b8a6;
-  --primary-dark: #0f766e;
-  --danger: #dc2626;
+  /* Ola Chalet brand palette — warm cream & espresso brown */
+  --bg: #f4e9d7;
+  --surface: #fcf6ec;
+  --surface-2: #f0e2cd;
+  --border: #e0cdb0;
+  --text: #3d2a1a;
+  --text-muted: #8a6f55;
+  --primary: #7a4f2e;
+  --primary-dark: #5c3a21;
+  --on-primary: #fbf2e3;
+  --danger: #b23a2e;
   --radius: 12px;
-  --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow: 0 8px 24px rgba(92, 58, 33, 0.18);
 }
 
 * {
@@ -93,7 +95,7 @@ button {
 
 .nav-link.active {
   background: var(--primary-dark);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .nav-link .icon {
@@ -145,13 +147,13 @@ button {
 .btn-primary {
   background: var(--primary);
   border-color: var(--primary);
-  color: #04201c;
+  color: var(--on-primary);
 }
 
 .btn-danger {
   background: transparent;
   border-color: var(--danger);
-  color: #f87171;
+  color: var(--danger);
 }
 
 .btn-ghost {
@@ -313,7 +315,7 @@ button {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(3, 7, 18, 0.7);
+  background: rgba(60, 42, 26, 0.45);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: flex-start;
@@ -470,7 +472,7 @@ button {
 .tag-remove {
   background: transparent;
   border: none;
-  color: #d6fff8;
+  color: var(--on-primary);
   font-size: 15px;
   line-height: 1;
   padding: 0;
@@ -657,9 +659,9 @@ button {
 }
 
 .banner-error {
-  background: rgba(220, 38, 38, 0.12);
-  border-color: rgba(220, 38, 38, 0.5);
-  color: #fca5a5;
+  background: rgba(178, 58, 46, 0.12);
+  border-color: rgba(178, 58, 46, 0.5);
+  color: #b23a2e;
 }
 
 /* ---------- Login ---------- */

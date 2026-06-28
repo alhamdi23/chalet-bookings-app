@@ -3,6 +3,8 @@ import CalendarScreen from './screens/Calendar/CalendarScreen';
 import CostsScreen from './screens/Costs/CostsScreen';
 import DashboardScreen from './screens/Dashboard/DashboardScreen';
 import SettingsScreen from './screens/Settings/SettingsScreen';
+import { useAppStore } from './store/AppStore';
+import { resolveAppName, resolveLogoSrc } from './data/settings';
 
 const NAV_ITEMS = [
   { to: '/calendar', label: 'Calendar', icon: '📅' },
@@ -12,12 +14,14 @@ const NAV_ITEMS = [
 ];
 
 export default function App() {
+  const { settings } = useAppStore();
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <img src="favicon.svg" alt="" />
-          <span>Chalet Admin</span>
+          <img src={resolveLogoSrc(settings)} alt={resolveAppName(settings)} />
+          <span>{resolveAppName(settings)}</span>
         </div>
         {NAV_ITEMS.map((item) => (
           <NavLink

@@ -1,9 +1,9 @@
 {
-  "name": "Chalet Booking Admin",
-  "short_name": "Chalet",
+  "name": "Ola Chalet",
+  "short_name": "Ola Chalet",
   "description": "Manage chalet bookings, operation costs, and business dashboard.",
-  "theme_color": "#0f766e",
-  "background_color": "#0b1220",
+  "theme_color": "#7a4f2e",
+  "background_color": "#f4e9d7",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "./",

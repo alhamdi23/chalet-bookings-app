@@ -21,6 +21,7 @@ import { STATUS_COLORS, type BookingStatus } from '../../types';
 import { formatOmr } from '../../utils/currency';
 import { toIsoDate } from '../../utils/dates';
 import { computeMetrics } from '../../utils/metrics';
+import { exportExcel, type ExcelSheet } from '../../utils/exportExcel';
 
 const PIE_COLORS = ['#14b8a6', '#6366f1', '#f59e0b', '#ef4444', '#10b981', '#8b5cf6', '#ec4899'];
 
@@ -39,10 +40,57 @@ export default function DashboardScreen() {
     return sorted[0]?.nights > 0 ? sorted[0].weekday : '—';
   }, [metrics.weekdayCounts]);
 
+  const handleExport = () => {
+    const sheets: ExcelSheet[] = [
+      {
+        name: 'Summary',
+        headers: ['Metric', 'Value'],
+        rows: [
+          ['Date range', `${fromDate} to ${toDate}`],
+          ['Booked Nights', metrics.bookedNights],
+          ['Total Nights', metrics.totalNights],
+          ['Occupancy %', Number(metrics.occupancyPct.toFixed(1))],
+          ['Revenue (OMR)', metrics.revenue],
+          ['Total Costs (OMR)', metrics.totalCosts],
+          ['Net Profit (OMR)', metrics.netProfit],
+          ['Insurance Held (OMR)', metrics.insuranceHeld],
+          ['Bookings', metrics.bookingCount],
+          ['Busiest Weekday', busiestWeekday],
+        ],
+      },
+      {
+        name: 'Monthly Trend',
+        headers: ['Period', 'Revenue (OMR)', 'Costs (OMR)'],
+        rows: metrics.trend.map((point) => [point.period, point.revenue, point.costs]),
+      },
+      {
+        name: 'By Status',
+        headers: ['Status', 'Bookings'],
+        rows: metrics.statusCounts.map((entry) => [entry.label, entry.value]),
+      },
+      {
+        name: 'By Weekday',
+        headers: ['Weekday', 'Booked Nights'],
+        rows: metrics.weekdayCounts.map((entry) => [entry.weekday, entry.nights]),
+      },
+      {
+        name: 'Costs by Type',
+        headers: ['Cost Type', 'Amount (OMR)'],
+        rows: metrics.costBreakdown.map((entry) => [entry.name, entry.value]),
+      },
+    ];
+    exportExcel(`dashboard-${fromDate}_to_${toDate}`, sheets);
+  };
+
   return (
     <div>
       <div className="page-header">
         <h1 className="page-title">Dashboard</h1>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn" onClick={handleExport}>
+            ⬇ Export Excel
+          </button>
+        </div>
       </div>
 
       <div className="filters">

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from './AuthProvider';
+import { loadSettings, resolveAppName, resolveLogoSrc } from '../data/settings';
 
 /** Map Firebase auth error codes to friendly messages. */
 function friendlyError(error: unknown): string {
@@ -38,6 +39,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const branding = loadSettings();
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -68,8 +70,8 @@ export default function LoginScreen() {
     <div className="login-shell">
       <form className="login-card" onSubmit={handleSubmit}>
         <div className="login-brand">
-          <img src="favicon.svg" alt="" />
-          <span>Chalet Admin</span>
+          <img src={resolveLogoSrc(branding)} alt={resolveAppName(branding)} />
+          <span>{resolveAppName(branding)}</span>
         </div>
         <p className="kpi-sub" style={{ marginBottom: 18 }}>
           Sign in to manage bookings and costs.

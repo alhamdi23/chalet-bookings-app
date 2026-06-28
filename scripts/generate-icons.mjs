@@ -1,5 +1,5 @@
 // Dependency-free PNG icon generator (uses Node built-in zlib).
-// Renders a teal rounded-square with a simple white "chalet" house glyph.
+// Renders a cream rounded-square with a simple brown "chalet" house glyph.
 // Outputs the PNG sizes referenced by the PWA manifest into /public.
 import { deflateSync } from 'node:zlib';
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -10,9 +10,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const publicDir = join(__dirname, '..', 'public');
 mkdirSync(publicDir, { recursive: true });
 
-const BG = [15, 118, 110, 255]; // #0f766e teal
-const HOUSE = [255, 255, 255, 255];
-const ROOF = [153, 246, 228, 255]; // #99f6e4
+const BG = [243, 231, 214, 255]; // #f3e7d6 cream
+const HOUSE = [92, 58, 33, 255]; // #5c3a21 espresso brown
+const ROOF = [122, 79, 46, 255]; // #7a4f2e warm brown
 
 function crc32(buf) {
   let c = ~0;
@@ -59,7 +59,7 @@ function renderPixel(x, y, size) {
   // body
   if (ny > roofBottom && ny < 0.82 && nx > 0.22 && nx < 0.78) {
     // door
-    if (ny > 0.6 && nx > 0.44 && nx < 0.56) return ROOF;
+    if (ny > 0.6 && nx > 0.44 && nx < 0.56) return BG;
     return HOUSE;
   }
 

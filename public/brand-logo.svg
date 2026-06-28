@@ -1,22 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Ola Chalet">
   <rect width="240" height="240" rx="48" fill="#f3e7d6"/>
   <g fill="none" stroke="#5c3a21" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Arch frame -->
     <path d="M58 196 V108 Q58 52 120 52 Q182 52 182 108 V196"/>
     <path d="M68 196 V110 Q68 62 120 62 Q172 62 172 110 V196"/>
+    <!-- Ground baseline inside arch -->
     <path d="M68 178 H172"/>
+    <!-- Sun -->
     <circle cx="92" cy="96" r="13"/>
+    <!-- Palm tree -->
     <path d="M150 178 Q146 132 150 100"/>
     <path d="M150 100 Q128 92 112 100"/>
     <path d="M150 100 Q172 92 188 100"/>
     <path d="M150 100 Q134 84 122 80"/>
     <path d="M150 100 Q166 84 178 80"/>
     <path d="M150 100 Q150 82 150 72"/>
+    <!-- Chalet house -->
     <path d="M118 178 V120 H158 V178"/>
     <path d="M132 178 V152 Q132 144 138 144 Q144 144 144 152 V178"/>
     <path d="M124 132 Q124 126 128 126 Q132 126 132 132 V138 H124 Z"/>
     <path d="M144 132 Q144 126 148 126 Q152 126 152 132 V138 H144 Z"/>
+    <!-- Beach umbrella -->
     <path d="M88 178 V146"/>
     <path d="M70 146 Q88 130 106 146 Q88 140 70 146 Z"/>
+    <!-- Lounger -->
     <path d="M74 170 l16 -6 M76 170 v6 M88 164 v6"/>
   </g>
 </svg>

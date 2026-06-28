@@ -6,6 +6,7 @@ import { formatDisplayDate, isWithinIso, todayIso } from '../../utils/dates';
 import { startOfMonth } from 'date-fns';
 import { toIsoDate } from '../../utils/dates';
 import DateField from '../../components/DateField';
+import { exportExcel, type CellValue } from '../../utils/exportExcel';
 import CostForm, { emptyCost, type CostFormData } from './CostForm';
 import CostTypesModal from './CostTypesModal';
 
@@ -71,6 +72,24 @@ export default function CostsScreen() {
     }
   };
 
+  const handleExport = () => {
+    const rows: CellValue[][] = filtered.map((cost) => [
+      formatDisplayDate(cost.date),
+      typeNameById.get(cost.costTypeId) ?? 'Unknown',
+      cost.note,
+      cost.amount,
+    ]);
+    rows.push(['', '', 'Total', total]);
+
+    exportExcel(`operation-costs-${fromDate}_to_${toDate}`, [
+      {
+        name: 'Operation Costs',
+        headers: ['Date', 'Type', 'Note', 'Amount (OMR)'],
+        rows,
+      },
+    ]);
+  };
+
   const defaultTypeId = activeTypes[0]?.id ?? '';
 
   return (
@@ -80,6 +99,13 @@ export default function CostsScreen() {
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn" onClick={() => setManagingTypes(true)}>
             Cost Types
+          </button>
+          <button
+            className="btn"
+            onClick={handleExport}
+            disabled={filtered.length === 0}
+          >
+            ⬇ Export Excel
           </button>
           <button
             className="btn btn-primary"
