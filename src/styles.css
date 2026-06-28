@@ -656,6 +656,84 @@ button {
   margin-bottom: 16px;
 }
 
+.banner-error {
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.5);
+  color: #fca5a5;
+}
+
+/* ---------- Login ---------- */
+.login-shell {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(20px + env(safe-area-inset-top)) 16px
+    calc(20px + env(safe-area-inset-bottom));
+  background: var(--bg);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 24px;
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.login-brand img {
+  width: 32px;
+  height: 32px;
+}
+
+.btn.full {
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #ffffff;
+  color: #1f2937;
+  border-color: #ffffff;
+  font-weight: 600;
+}
+
+.btn-google:hover {
+  background: #f1f5f9;
+  border-color: #f1f5f9;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+  color: var(--muted, #94a3b8);
+  font-size: 12px;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
 .toggle-row {
   display: flex;
   align-items: center;

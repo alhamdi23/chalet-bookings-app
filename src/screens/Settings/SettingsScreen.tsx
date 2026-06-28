@@ -1,22 +1,11 @@
-import { useState } from 'react';
 import { useAppStore } from '../../store/AppStore';
-import type { AppSettings } from '../../types';
+import { cloudEnabled } from '../../data/firestoreSync';
+import { useAuth } from '../../auth/AuthProvider';
 import { formatDisplayDate } from '../../utils/dates';
 
 export default function SettingsScreen() {
   const { settings, updateSettings, runSync, syncing, syncMessage } = useAppStore();
-  const [draft, setDraft] = useState<AppSettings>(settings);
-  const [saved, setSaved] = useState(false);
-
-  const update = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
-    setDraft((prev) => ({ ...prev, [key]: value }));
-    setSaved(false);
-  };
-
-  const handleSave = () => {
-    updateSettings(draft);
-    setSaved(true);
-  };
+  const { user, logOut } = useAuth();
 
   return (
     <div>
@@ -26,56 +15,62 @@ export default function SettingsScreen() {
 
       {syncMessage && <div className="banner">{syncMessage}</div>}
 
-      <div className="card" style={{ maxWidth: 640 }}>
-        <h3 className="chart-title">Google Sheets Sync</h3>
+      <div className="card" style={{ maxWidth: 640, marginBottom: 16 }}>
+        <h3 className="chart-title">Account</h3>
         <p className="kpi-sub" style={{ marginBottom: 16 }}>
-          Deploy the included Apps Script as a Web App, then paste its URL and your
-          chosen token below. Your data stays in your own Google account.
+          Signed in as <strong>{user?.email ?? 'unknown'}</strong>.
         </p>
+        <button className="btn" onClick={() => void logOut()}>
+          Sign Out
+        </button>
+      </div>
 
-        <div className="field full" style={{ marginBottom: 14 }}>
-          <label htmlFor="syncUrl">Apps Script Web App URL</label>
-          <input
-            id="syncUrl"
-            value={draft.syncUrl}
-            onChange={(event) => update('syncUrl', event.target.value)}
-            placeholder="https://script.google.com/macros/s/.../exec"
-          />
-        </div>
+      <div className="card" style={{ maxWidth: 640 }}>
+        <h3 className="chart-title">Cloud Sync (Firebase)</h3>
 
-        <div className="field full" style={{ marginBottom: 14 }}>
-          <label htmlFor="syncToken">Shared Token</label>
-          <input
-            id="syncToken"
-            value={draft.syncToken}
-            onChange={(event) => update('syncToken', event.target.value)}
-            placeholder="A secret word you also set in the script"
-          />
-        </div>
+        {cloudEnabled ? (
+          <p className="kpi-sub" style={{ marginBottom: 16 }}>
+            Real-time cloud sync is <strong>active</strong>. Bookings and costs sync
+            automatically across all your devices — no button needed. The app also
+            works offline and syncs when the connection returns.
+          </p>
+        ) : (
+          <p className="kpi-sub" style={{ marginBottom: 16 }}>
+            Cloud sync is <strong>not configured yet</strong>. The app still works
+            and stores everything on this device. To sync across your PC and iPhone,
+            add your Firebase config in <code>src/firebase/config.ts</code> and
+            redeploy. Setup steps are in that file.
+          </p>
+        )}
 
         <div className="toggle-row" style={{ marginBottom: 18 }}>
           <input
             id="autoSync"
             type="checkbox"
-            checked={draft.autoSync}
-            onChange={(event) => update('autoSync', event.target.checked)}
+            checked={settings.autoSync}
+            onChange={(event) =>
+              updateSettings({ ...settings, autoSync: event.target.checked })
+            }
           />
-          <label htmlFor="autoSync">Auto-sync when the app opens (if online)</label>
+          <label htmlFor="autoSync">Full sync when the app opens (if online)</label>
         </div>
 
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <button className="btn btn-primary" onClick={handleSave}>
-            Save Settings
+          <button
+            className="btn btn-primary"
+            onClick={() => void runSync()}
+            disabled={syncing || !cloudEnabled}
+          >
+            {syncing ? 'Syncing…' : 'Force Sync Now'}
           </button>
-          <button className="btn" onClick={() => void runSync()} disabled={syncing}>
-            {syncing ? 'Syncing…' : 'Sync Now'}
-          </button>
-          {saved && <span className="kpi-sub">Saved.</span>}
+          {!cloudEnabled && (
+            <span className="kpi-sub">Add Firebase config to enable.</span>
+          )}
         </div>
 
         {settings.lastSyncedAt && (
           <p className="kpi-sub" style={{ marginTop: 14 }}>
-            Last synced: {formatDisplayDate(settings.lastSyncedAt.slice(0, 10))}
+            Last full sync: {formatDisplayDate(settings.lastSyncedAt.slice(0, 10))}
           </p>
         )}
       </div>

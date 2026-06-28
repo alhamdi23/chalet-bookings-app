@@ -47,13 +47,19 @@ export function upsert<T extends Syncable>(key: CollectionKey, record: T): T {
 }
 
 /** Soft-delete a record by id (keeps a tombstone for sync). */
-export function softDelete<T extends Syncable>(key: CollectionKey, id: string): void {
+export function softDelete<T extends Syncable>(
+  key: CollectionKey,
+  id: string,
+): T | undefined {
   const items = read<T>(key);
   const index = items.findIndex((item) => item.id === id);
   if (index >= 0) {
-    items[index] = { ...items[index], deleted: true, updatedAt: nowIso() };
+    const updated = { ...items[index], deleted: true, updatedAt: nowIso() };
+    items[index] = updated;
     write(key, items);
+    return updated;
   }
+  return undefined;
 }
 
 /**

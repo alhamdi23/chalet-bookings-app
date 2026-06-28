@@ -53,11 +53,7 @@ export interface OperationCost {
 }
 
 export interface AppSettings {
-  /** Google Apps Script Web App deployment URL */
-  syncUrl: string;
-  /** Shared secret token validated by the Apps Script */
-  syncToken: string;
-  /** Automatically pull/push on app load when online */
+  /** Run a full pull/push once when the app opens (if online) */
   autoSync: boolean;
   lastSyncedAt: string | null;
 }

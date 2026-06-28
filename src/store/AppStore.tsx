@@ -15,7 +15,12 @@ import type {
 } from '../types';
 import * as repo from '../data/localRepo';
 import { loadSettings, saveSettings } from '../data/settings';
-import { syncNow } from '../data/syncService';
+import {
+  cloudEnabled,
+  manualSync,
+  pushRecord,
+  subscribeAll,
+} from '../data/firestoreSync';
 import { newId, nowIso } from '../utils/id';
 
 const DEFAULT_COST_TYPE_NAMES = [
@@ -54,6 +59,11 @@ interface AppStoreValue {
 
 const AppStoreContext = createContext<AppStoreValue | null>(null);
 
+/** Deterministic id so both devices seed the SAME default record (merges to one). */
+function seedId(name: string): string {
+  return 'seed-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
 function seedCostTypesIfEmpty(): CostType[] {
   const existing = repo.listAll<CostType>('costTypes');
   if (existing.length > 0) {
@@ -61,7 +71,7 @@ function seedCostTypesIfEmpty(): CostType[] {
   }
   for (const name of DEFAULT_COST_TYPE_NAMES) {
     repo.upsert<CostType>('costTypes', {
-      id: newId(),
+      id: seedId(name),
       name,
       active: true,
       createdAt: nowIso(),
@@ -98,17 +108,22 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     seedCostTypesIfEmpty();
     refresh();
+    // Real-time cloud subscription: merges remote changes into local cache and
+    // refreshes the UI. Returns an unsubscribe handler.
+    const unsubscribe = subscribeAll(refresh);
+    return unsubscribe;
   }, [refresh]);
 
   const addBooking = useCallback(
     (data: NewBooking) => {
-      repo.upsert<Booking>('bookings', {
+      const saved = repo.upsert<Booking>('bookings', {
         ...data,
         id: newId(),
         createdAt: nowIso(),
         updatedAt: nowIso(),
         deleted: false,
       });
+      pushRecord('bookings', saved);
       refresh();
     },
     [refresh],
@@ -122,12 +137,13 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       if (!existing) {
         return;
       }
-      repo.upsert<Booking>('bookings', {
+      const saved = repo.upsert<Booking>('bookings', {
         ...existing,
         ...data,
         id,
         updatedAt: nowIso(),
       });
+      pushRecord('bookings', saved);
       refresh();
     },
     [refresh],
@@ -135,7 +151,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const deleteBooking = useCallback(
     (id: string) => {
-      repo.softDelete<Booking>('bookings', id);
+      const removed = repo.softDelete<Booking>('bookings', id);
+      if (removed) {
+        pushRecord('bookings', removed);
+      }
       refresh();
     },
     [refresh],
@@ -143,13 +162,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const addCost = useCallback(
     (data: NewCost) => {
-      repo.upsert<OperationCost>('operationCosts', {
+      const saved = repo.upsert<OperationCost>('operationCosts', {
         ...data,
         id: newId(),
         createdAt: nowIso(),
         updatedAt: nowIso(),
         deleted: false,
       });
+      pushRecord('operationCosts', saved);
       refresh();
     },
     [refresh],
@@ -163,12 +183,13 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       if (!existing) {
         return;
       }
-      repo.upsert<OperationCost>('operationCosts', {
+      const saved = repo.upsert<OperationCost>('operationCosts', {
         ...existing,
         ...data,
         id,
         updatedAt: nowIso(),
       });
+      pushRecord('operationCosts', saved);
       refresh();
     },
     [refresh],
@@ -176,7 +197,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const deleteCost = useCallback(
     (id: string) => {
-      repo.softDelete<OperationCost>('operationCosts', id);
+      const removed = repo.softDelete<OperationCost>('operationCosts', id);
+      if (removed) {
+        pushRecord('operationCosts', removed);
+      }
       refresh();
     },
     [refresh],
@@ -188,7 +212,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       if (!trimmed) {
         return;
       }
-      repo.upsert<CostType>('costTypes', {
+      const saved = repo.upsert<CostType>('costTypes', {
         id: newId(),
         name: trimmed,
         active: true,
@@ -196,6 +220,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         updatedAt: nowIso(),
         deleted: false,
       });
+      pushRecord('costTypes', saved);
       refresh();
     },
     [refresh],
@@ -209,7 +234,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       if (!existing) {
         return;
       }
-      repo.upsert<CostType>('costTypes', { ...existing, active, updatedAt: nowIso() });
+      const saved = repo.upsert<CostType>('costTypes', {
+        ...existing,
+        active,
+        updatedAt: nowIso(),
+      });
+      pushRecord('costTypes', saved);
       refresh();
     },
     [refresh],
@@ -224,7 +254,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     setSyncing(true);
     setSyncMessage(null);
     try {
-      const result = await syncNow(settings);
+      const result = await manualSync();
       const next: AppSettings = { ...settings, lastSyncedAt: nowIso() };
       saveSettings(next);
       setSettings(next);
@@ -238,9 +268,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     }
   }, [settings, refresh]);
 
-  // Auto-sync on load when configured and online.
+  // Auto-sync once on load when cloud is configured and online. Real-time
+  // listeners keep things in sync afterwards.
   useEffect(() => {
-    if (settings.autoSync && settings.syncUrl && navigator.onLine) {
+    if (settings.autoSync && cloudEnabled && navigator.onLine) {
       void runSync();
     }
     // Intentionally run once on mount.

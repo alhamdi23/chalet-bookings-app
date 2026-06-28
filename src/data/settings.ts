@@ -3,8 +3,6 @@ import type { AppSettings } from '../types';
 const SETTINGS_KEY = 'chalet:settings';
 
 const DEFAULT_SETTINGS: AppSettings = {
-  syncUrl: '',
-  syncToken: '',
   autoSync: true,
   lastSyncedAt: null,
 };
