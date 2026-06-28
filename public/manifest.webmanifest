@@ -1,0 +1,16 @@
+{
+  "name": "Chalet Booking Admin",
+  "short_name": "Chalet",
+  "description": "Manage chalet bookings, operation costs, and business dashboard.",
+  "theme_color": "#0f766e",
+  "background_color": "#0b1220",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "./",
+  "start_url": "./",
+  "icons": [
+    { "src": "pwa-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

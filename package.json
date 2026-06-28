@@ -1,0 +1,29 @@
+{
+  "name": "chalet-booking-app",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Standalone admin app to manage chalet bookings, operation costs, and a business dashboard. Offline-first with Google Sheets sync.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "mock": "node mock-server/server.mjs"
+  },
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "recharts": "^2.12.7",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@types/uuid": "^9.0.8",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.6"
+  }
+}
