@@ -119,23 +119,26 @@ export default function CalendarScreen() {
       </div>
 
       <div className="calendar-toolbar">
-        <button className="btn btn-sm" onClick={goPrev}>
-          ‹ Prev
-        </button>
-        <span className="calendar-month-title">{formatMonthTitle(viewMonth)}</span>
-        <button className="btn btn-sm" onClick={goNext}>
-          Next ›
-        </button>
-        <button className="btn btn-sm" onClick={goToToday}>
-          Today
-        </button>
-        <input
-          className="btn btn-sm"
-          type="month"
-          value={monthValue}
-          onChange={(event) => onMonthInput(event.target.value)}
-          style={{ padding: '6px 10px' }}
-        />
+        <div className="calendar-nav">
+          <button className="btn btn-sm calendar-nav-btn" onClick={goPrev} aria-label="Previous month">
+            ‹
+          </button>
+          <span className="calendar-month-title">{formatMonthTitle(viewMonth)}</span>
+          <button className="btn btn-sm calendar-nav-btn" onClick={goNext} aria-label="Next month">
+            ›
+          </button>
+        </div>
+        <div className="calendar-actions">
+          <button className="btn btn-sm" onClick={goToToday}>
+            Today
+          </button>
+          <input
+            className="btn btn-sm calendar-month-input"
+            type="month"
+            value={monthValue}
+            onChange={(event) => onMonthInput(event.target.value)}
+          />
+        </div>
       </div>
 
       <div className="calendar-grid">

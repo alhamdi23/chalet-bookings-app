@@ -112,7 +112,8 @@ export default function CostsScreen() {
         {filtered.length === 0 ? (
           <div className="empty-state">No costs recorded in this range.</div>
         ) : (
-          <table className="table">
+          <div className="table-scroll">
+            <table className="table">
             <thead>
               <tr>
                 <th>Date</th>
@@ -142,7 +143,8 @@ export default function CostsScreen() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
 
