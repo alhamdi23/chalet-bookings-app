@@ -737,6 +737,273 @@ button {
   }
 }
 
+/* ---------- Availability / share calendar ---------- */
+.avail-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.avail-pricing {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.avail-pricing-hint {
+  margin: -4px 0 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.avail-price-head,
+.avail-price-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.avail-price-head {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding-bottom: 2px;
+}
+
+.avail-price-day {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.avail-price-row input {
+  width: 100%;
+  padding: 7px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  text-align: right;
+}
+
+.avail-price-row input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.avail-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.avail-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.avail-export-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.avail-export-buttons .btn {
+  justify-content: center;
+}
+
+/* ---- Preview card ---- */
+.avail-preview {
+  min-width: 0;
+}
+
+.avail-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.avail-preview-title {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.avail-preview-month {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.avail-tag {
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 16px;
+}
+
+.avail-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.avail-weekday {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding-bottom: 4px;
+}
+
+.avail-day {
+  min-height: 78px;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.avail-day.outside {
+  background: var(--surface-2);
+  opacity: 0.5;
+}
+
+.avail-day.available {
+  background: #e6f4e6;
+  border-color: #bfe0bf;
+}
+
+.avail-day.booked {
+  background: #f6dcd7;
+  border-color: #e6b9af;
+}
+
+.avail-day.today {
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.avail-day-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.avail-day-number {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.avail-day-status {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.avail-day.available .avail-day-status {
+  color: #1f7a34;
+}
+
+.avail-day.booked .avail-day-status {
+  color: var(--danger);
+}
+
+.avail-day-price {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.avail-price-old {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.avail-price-offer {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1f7a34;
+}
+
+.avail-price-reg {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.avail-legend {
+  display: flex;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.avail-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.avail-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid transparent;
+}
+
+.avail-swatch.available {
+  background: #e6f4e6;
+  border-color: #bfe0bf;
+}
+
+.avail-swatch.booked {
+  background: #f6dcd7;
+  border-color: #e6b9af;
+}
+
+@media (max-width: 900px) {
+  .avail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .avail-pricing {
+    position: static;
+  }
+
+  .avail-day {
+    min-height: 64px;
+    padding: 6px;
+  }
+
+  .avail-day-number {
+    font-size: 15px;
+  }
+
+  .avail-day-status {
+    font-size: 9px;
+  }
+
+  .avail-weekday {
+    font-size: 11px;
+  }
+}
+
 /* ---------- Filters row ---------- */
 .filters {
   display: flex;

@@ -1,5 +1,6 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import CalendarScreen from './screens/Calendar/CalendarScreen';
+import AvailabilityScreen from './screens/Availability/AvailabilityScreen';
 import CostsScreen from './screens/Costs/CostsScreen';
 import DashboardScreen from './screens/Dashboard/DashboardScreen';
 import EstimationScreen from './screens/Estimation/EstimationScreen';
@@ -9,6 +10,7 @@ import { resolveAppName, resolveLogoSrc } from './data/settings';
 
 const NAV_ITEMS = [
   { to: '/calendar', label: 'Calendar', icon: '📅' },
+  { to: '/availability', label: 'Availability', icon: '🖼️' },
   { to: '/costs', label: 'Costs', icon: '💡' },
   { to: '/dashboard', label: 'Dashboard', icon: '📊' },
   { to: '/estimation', label: 'Estimation', icon: '📈' },
@@ -41,6 +43,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/calendar" replace />} />
           <Route path="/calendar" element={<CalendarScreen />} />
+          <Route path="/availability" element={<AvailabilityScreen />} />
           <Route path="/costs" element={<CostsScreen />} />
           <Route path="/dashboard" element={<DashboardScreen />} />
           <Route path="/estimation" element={<EstimationScreen />} />

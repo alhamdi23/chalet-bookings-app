@@ -52,6 +52,14 @@ export interface OperationCost {
   deleted: boolean;
 }
 
+/** Per-weekday rental price plus an optional discounted (offer) price. */
+export interface WeekdayPrice {
+  /** Regular nightly price for this weekday (OMR). */
+  price: number;
+  /** Optional promotional price (OMR). 0 means no discount. */
+  discount: number;
+}
+
 export interface AppSettings {
   /** Run a full pull/push once when the app opens (if online) */
   autoSync: boolean;
@@ -60,6 +68,8 @@ export interface AppSettings {
   appName: string;
   /** Custom logo as a data URL; null falls back to the bundled brand logo */
   logoDataUrl: string | null;
+  /** Price + discount per weekday, indexed by JS getDay() (0=Sun … 6=Sat). */
+  weekdayPricing: WeekdayPrice[];
 }
 
 /** A record that carries a soft-delete flag and updatedAt for sync merging */

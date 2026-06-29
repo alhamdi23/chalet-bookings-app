@@ -1,4 +1,4 @@
-import type { AppSettings } from '../types';
+import type { AppSettings, WeekdayPrice } from '../types';
 
 const SETTINGS_KEY = 'chalet:settings';
 
@@ -8,11 +8,34 @@ export const DEFAULT_APP_NAME = 'Ola Chalet';
 /** Bundled brand logo used when no custom logo has been uploaded. */
 export const DEFAULT_LOGO_SRC = `${import.meta.env.BASE_URL}brand-logo.svg`;
 
+/** Seven empty weekday prices (index by JS getDay(): 0=Sun … 6=Sat). */
+export function emptyWeekdayPricing(): WeekdayPrice[] {
+  return Array.from({ length: 7 }, () => ({ price: 0, discount: 0 }));
+}
+
+/** Ensure weekdayPricing is always a 7-length array of valid entries. */
+function normalizeWeekdayPricing(value: unknown): WeekdayPrice[] {
+  const base = emptyWeekdayPricing();
+  if (Array.isArray(value)) {
+    for (let i = 0; i < 7; i += 1) {
+      const entry = value[i] as Partial<WeekdayPrice> | undefined;
+      if (entry) {
+        base[i] = {
+          price: Number(entry.price) || 0,
+          discount: Number(entry.discount) || 0,
+        };
+      }
+    }
+  }
+  return base;
+}
+
 const DEFAULT_SETTINGS: AppSettings = {
   autoSync: true,
   lastSyncedAt: null,
   appName: DEFAULT_APP_NAME,
   logoDataUrl: null,
+  weekdayPricing: emptyWeekdayPricing(),
 };
 
 /** Resolve the logo image source: custom upload if present, else the brand logo. */
@@ -29,11 +52,16 @@ export function loadSettings(): AppSettings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) {
-      return { ...DEFAULT_SETTINGS };
+      return { ...DEFAULT_SETTINGS, weekdayPricing: emptyWeekdayPricing() };
     }
-    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<AppSettings>) };
+    const parsed = JSON.parse(raw) as Partial<AppSettings>;
+    return {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+      weekdayPricing: normalizeWeekdayPricing(parsed.weekdayPricing),
+    };
   } catch {
-    return { ...DEFAULT_SETTINGS };
+    return { ...DEFAULT_SETTINGS, weekdayPricing: emptyWeekdayPricing() };
   }
 }
 
