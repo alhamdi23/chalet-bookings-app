@@ -70,6 +70,8 @@ export interface AppSettings {
   logoDataUrl: string | null;
   /** Price + discount per weekday, indexed by JS getDay() (0=Sun … 6=Sat). */
   weekdayPricing: WeekdayPrice[];
+  /** ISO timestamp of the last weekday-pricing change (for cloud last-write-wins). */
+  weekdayPricingUpdatedAt: string;
 }
 
 /** A record that carries a soft-delete flag and updatedAt for sync merging */

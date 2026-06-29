@@ -36,6 +36,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   appName: DEFAULT_APP_NAME,
   logoDataUrl: null,
   weekdayPricing: emptyWeekdayPricing(),
+  weekdayPricingUpdatedAt: '',
 };
 
 /** Resolve the logo image source: custom upload if present, else the brand logo. */
@@ -59,6 +60,7 @@ export function loadSettings(): AppSettings {
       ...DEFAULT_SETTINGS,
       ...parsed,
       weekdayPricing: normalizeWeekdayPricing(parsed.weekdayPricing),
+      weekdayPricingUpdatedAt: parsed.weekdayPricingUpdatedAt ?? '',
     };
   } catch {
     return { ...DEFAULT_SETTINGS, weekdayPricing: emptyWeekdayPricing() };

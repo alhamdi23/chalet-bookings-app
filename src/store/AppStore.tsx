@@ -19,7 +19,9 @@ import {
   cloudEnabled,
   manualSync,
   pushRecord,
+  pushWeekdayPricing,
   subscribeAll,
+  subscribeWeekdayPricing,
 } from '../data/firestoreSync';
 import { newId, nowIso } from '../utils/id';
 
@@ -112,7 +114,26 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     // Real-time cloud subscription: merges remote changes into local cache and
     // refreshes the UI. Returns an unsubscribe handler.
     const unsubscribe = subscribeAll(refresh);
-    return unsubscribe;
+    // Shared weekday pricing: apply the remote value when it's newer than the
+    // local copy (last-write-wins), so all users stay in sync.
+    const unsubscribePricing = subscribeWeekdayPricing((remote) => {
+      setSettings((prev) => {
+        if (remote.updatedAt <= prev.weekdayPricingUpdatedAt) {
+          return prev;
+        }
+        const next: AppSettings = {
+          ...prev,
+          weekdayPricing: remote.pricing,
+          weekdayPricingUpdatedAt: remote.updatedAt,
+        };
+        saveSettings(next);
+        return next;
+      });
+    });
+    return () => {
+      unsubscribe();
+      unsubscribePricing();
+    };
   }, [refresh]);
 
   const addBooking = useCallback(
@@ -269,8 +290,20 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   );
 
   const updateSettings = useCallback((next: AppSettings) => {
-    saveSettings(next);
-    setSettings(next);
+    setSettings((prev) => {
+      let toSave = next;
+      // When the shared weekday pricing changes, stamp it and push to the cloud
+      // so every signed-in user sees the same prices.
+      if (
+        JSON.stringify(prev.weekdayPricing) !== JSON.stringify(next.weekdayPricing)
+      ) {
+        const stamp = nowIso();
+        toSave = { ...next, weekdayPricingUpdatedAt: stamp };
+        pushWeekdayPricing({ pricing: toSave.weekdayPricing, updatedAt: stamp });
+      }
+      saveSettings(toSave);
+      return toSave;
+    });
   }, []);
 
   const runSync = useCallback(async () => {
