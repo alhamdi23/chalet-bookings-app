@@ -97,10 +97,10 @@ export function computeEstimationDefaults(
   return {
     projectCost: FALLBACK.projectCost,
     fullDayPerMonth: fullDay.length ? round(fullDay.length / months, 1) : FALLBACK.fullDayPerMonth,
-    fullDayPrice: fullDay.length ? round(mean(fullDay), 3) : FALLBACK.fullDayPrice,
+    fullDayPrice: fullDay.length ? round(mean(fullDay), 2) : FALLBACK.fullDayPrice,
     halfDayPerMonth: halfDay.length ? round(halfDay.length / months, 1) : FALLBACK.halfDayPerMonth,
-    halfDayPrice: halfDay.length ? round(mean(halfDay), 3) : FALLBACK.halfDayPrice,
-    monthlyCost: costs.length ? round(totalCosts / months, 3) : FALLBACK.monthlyCost,
+    halfDayPrice: halfDay.length ? round(mean(halfDay), 2) : FALLBACK.halfDayPrice,
+    monthlyCost: costs.length ? round(totalCosts / months, 2) : FALLBACK.monthlyCost,
     monthsOfData: months,
   };
 }
@@ -123,17 +123,17 @@ export function computeEstimation(inputs: EstimationInputs): EstimationResult {
 
   const projection = Array.from({ length: years + 1 }, (_, year) => ({
     year,
-    cumulativeProfit: round(annualNet * year, 3),
+    cumulativeProfit: round(annualNet * year, 2),
     investment: inputs.projectCost,
   }));
 
   return {
-    fullDayRevenue: round(fullDayRevenue, 3),
-    halfDayRevenue: round(halfDayRevenue, 3),
-    monthlyRevenue: round(monthlyRevenue, 3),
-    monthlyNet: round(monthlyNet, 3),
-    annualRevenue: round(annualRevenue, 3),
-    annualNet: round(annualNet, 3),
+    fullDayRevenue: round(fullDayRevenue, 2),
+    halfDayRevenue: round(halfDayRevenue, 2),
+    monthlyRevenue: round(monthlyRevenue, 2),
+    monthlyNet: round(monthlyNet, 2),
+    annualRevenue: round(annualRevenue, 2),
+    annualNet: round(annualNet, 2),
     paybackYears,
     roiPct: round(roiPct, 1),
     projection,
