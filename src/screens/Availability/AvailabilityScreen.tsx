@@ -53,7 +53,9 @@ export default function AvailabilityScreen() {
     () =>
       days.map((day) => {
         const iso = toIsoDate(day);
-        const inMonth = day.getMonth() === currentMonth;
+        // Past days (and days outside the viewed month) are shown as blank
+        // boxes with no availability or price — nothing to book there.
+        const inMonth = day.getMonth() === currentMonth && iso >= today;
         const booked = inMonth && isBooked(iso);
         const wd = pricing[day.getDay()] ?? { price: 0, discount: 0 };
         return {
@@ -65,7 +67,7 @@ export default function AvailabilityScreen() {
           discount: wd.discount,
         };
       }),
-    [days, currentMonth, isBooked, pricing],
+    [days, currentMonth, today, isBooked, pricing],
   );
 
   const goPrev = () =>
