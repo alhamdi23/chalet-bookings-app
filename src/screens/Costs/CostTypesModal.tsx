@@ -7,6 +7,7 @@ interface CostTypesModalProps {
   onClose: () => void;
   onAdd: (name: string) => void;
   onToggle: (id: string, active: boolean) => void;
+  onRemove: (id: string) => void;
 }
 
 export default function CostTypesModal({
@@ -14,6 +15,7 @@ export default function CostTypesModal({
   onClose,
   onAdd,
   onToggle,
+  onRemove,
 }: CostTypesModalProps) {
   const [name, setName] = useState('');
 
@@ -46,7 +48,7 @@ export default function CostTypesModal({
         <thead>
           <tr>
             <th>Name</th>
-            <th style={{ textAlign: 'right' }}>Status</th>
+            <th style={{ textAlign: 'right' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -54,12 +56,34 @@ export default function CostTypesModal({
             <tr key={type.id}>
               <td>{type.name}</td>
               <td style={{ textAlign: 'right' }}>
-                <button
-                  className={`btn btn-sm${type.active ? '' : ' btn-ghost'}`}
-                  onClick={() => onToggle(type.id, !type.active)}
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    gap: 8,
+                    justifyContent: 'flex-end',
+                  }}
                 >
-                  {type.active ? 'Active' : 'Inactive'}
-                </button>
+                  <button
+                    className={`btn btn-sm${type.active ? '' : ' btn-ghost'}`}
+                    onClick={() => onToggle(type.id, !type.active)}
+                  >
+                    {type.active ? 'Active' : 'Inactive'}
+                  </button>
+                  <button
+                    className="btn btn-sm btn-ghost"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `Remove cost type "${type.name}"? Existing costs that use it are kept.`,
+                        )
+                      ) {
+                        onRemove(type.id);
+                      }
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

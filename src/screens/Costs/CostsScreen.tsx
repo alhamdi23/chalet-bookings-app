@@ -23,6 +23,7 @@ export default function CostsScreen() {
     deleteCost,
     addCostType,
     setCostTypeActive,
+    deleteCostType,
   } = useAppStore();
 
   const [fromDate, setFromDate] = useState<string>(toIsoDate(startOfMonth(new Date())));
@@ -191,6 +192,7 @@ export default function CostsScreen() {
           onClose={() => setManagingTypes(false)}
           onAdd={addCostType}
           onToggle={setCostTypeActive}
+          onRemove={deleteCostType}
         />
       )}
     </div>

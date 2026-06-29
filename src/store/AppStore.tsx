@@ -52,6 +52,7 @@ interface AppStoreValue {
 
   addCostType: (name: string) => void;
   setCostTypeActive: (id: string, active: boolean) => void;
+  deleteCostType: (id: string) => void;
 
   updateSettings: (settings: AppSettings) => void;
   runSync: () => Promise<void>;
@@ -212,11 +213,22 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       if (!trimmed) {
         return;
       }
+      // Prevent duplicates: match an existing record (including soft-deleted
+      // ones) by case-insensitive name. Reuse its id so we update in place
+      // instead of creating a second entry with the same name.
+      const existing = repo
+        .listAll<CostType>('costTypes')
+        .find(
+          (type) => type.name.trim().toLowerCase() === trimmed.toLowerCase(),
+        );
+      if (existing && !existing.deleted && existing.active) {
+        return;
+      }
       const saved = repo.upsert<CostType>('costTypes', {
-        id: newId(),
+        id: existing?.id ?? newId(),
         name: trimmed,
         active: true,
-        createdAt: nowIso(),
+        createdAt: existing?.createdAt ?? nowIso(),
         updatedAt: nowIso(),
         deleted: false,
       });
@@ -240,6 +252,17 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         updatedAt: nowIso(),
       });
       pushRecord('costTypes', saved);
+      refresh();
+    },
+    [refresh],
+  );
+
+  const deleteCostType = useCallback(
+    (id: string) => {
+      const removed = repo.softDelete<CostType>('costTypes', id);
+      if (removed) {
+        pushRecord('costTypes', removed);
+      }
       refresh();
     },
     [refresh],
@@ -294,6 +317,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       deleteCost,
       addCostType,
       setCostTypeActive,
+      deleteCostType,
       updateSettings,
       runSync,
     }),
@@ -312,6 +336,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       deleteCost,
       addCostType,
       setCostTypeActive,
+      deleteCostType,
       updateSettings,
       runSync,
     ],
