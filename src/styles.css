@@ -635,6 +635,108 @@ button {
   margin: 0 0 14px;
 }
 
+/* ---------- Estimation screen ---------- */
+.est-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.est-vars {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.est-var {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.est-var-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.est-var-head label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.est-var-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.est-var-input input {
+  width: 92px;
+  padding: 6px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.est-var-input input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.est-var-suffix {
+  font-size: 11px;
+  color: var(--text-muted);
+  min-width: 30px;
+}
+
+.est-slider {
+  width: 100%;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.est-var-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.est-results {
+  min-width: 0;
+}
+
+.kpi-card-accent {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: var(--on-primary);
+}
+
+.kpi-card-accent .kpi-label,
+.kpi-card-accent .kpi-sub {
+  color: var(--on-primary);
+  opacity: 0.85;
+}
+
+@media (max-width: 900px) {
+  .est-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .est-vars {
+    position: static;
+  }
+}
+
 /* ---------- Filters row ---------- */
 .filters {
   display: flex;
