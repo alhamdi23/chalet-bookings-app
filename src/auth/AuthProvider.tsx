@@ -18,9 +18,39 @@ import {
 } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../firebase/config';
 
+/**
+ * Remembers across launches whether the last known session was signed in, so
+ * the UI can optimistically show the app immediately (from local data) instead
+ * of blocking on the slow first `onAuthStateChanged` round-trip. This is only a
+ * UX hint — the real auth state still decides reads/writes.
+ */
+const AUTH_HINT_KEY = 'chalet:auth';
+
+function readAuthHint(): boolean {
+  try {
+    return localStorage.getItem(AUTH_HINT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function writeAuthHint(signedIn: boolean): void {
+  try {
+    if (signedIn) {
+      localStorage.setItem(AUTH_HINT_KEY, '1');
+    } else {
+      localStorage.removeItem(AUTH_HINT_KEY);
+    }
+  } catch {
+    // Ignore storage failures (private mode, quota); the hint is best-effort.
+  }
+}
+
 interface AuthValue {
   user: User | null;
   loading: boolean;
+  /** True if the previous session was signed in (used to skip the loader). */
+  knownSignedIn: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logOut: () => Promise<void>;
@@ -31,6 +61,9 @@ const AuthContext = createContext<AuthValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  // Optimistic hint from the previous launch; lets us render the app right away
+  // for returning users instead of showing the loading screen.
+  const [knownSignedIn] = useState<boolean>(readAuthHint);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) {
@@ -42,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (next) => {
       setUser(next);
       setLoading(false);
+      writeAuthHint(Boolean(next));
     });
     return unsubscribe;
   }, []);
@@ -50,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       loading,
+      knownSignedIn,
       signIn: async (email, password) => {
         if (!auth) {
           throw new Error('Authentication is not configured.');
@@ -70,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
     }),
-    [user, loading],
+    [user, loading, knownSignedIn],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
