@@ -23,6 +23,17 @@ export interface WeekdayPricingDoc {
   updatedAt: string;
 }
 
+/**
+ * Snapshot of how the live listener is doing, derived from Firestore snapshot
+ * metadata. `fromCache` is true when data is served from the offline cache (no
+ * live server connection); `hasPendingWrites` is true while local writes are
+ * still queued and have not been acknowledged by the server yet.
+ */
+export interface SyncSnapshotStatus {
+  fromCache: boolean;
+  hasPendingWrites: boolean;
+}
+
 
 /** True when a Firebase project has been configured in firebase/config.ts. */
 export const cloudEnabled = isFirebaseConfigured;
@@ -83,17 +94,45 @@ export async function fetchWeekdayPricing(): Promise<WeekdayPricingDoc | null> {
  * Subscribe to real-time updates for all collections. On every change the
  * incoming records are merged into localStorage (last-write-wins by updatedAt)
  * and `onChange` is invoked so the UI refreshes. Returns an unsubscribe fn.
+ *
+ * `onStatus` (optional) is called with aggregate snapshot metadata so the UI
+ * can show whether we are live, serving cached/offline data, or still flushing
+ * pending local writes. We pass `includeMetadataChanges` so the callback fires
+ * when only the connection state changes (e.g. cache -> live on reconnect).
  */
-export function subscribeAll(onChange: () => void): () => void {
+export function subscribeAll(
+  onChange: () => void,
+  onStatus?: (status: SyncSnapshotStatus) => void,
+): () => void {
   if (!isFirebaseConfigured || !db) {
     return () => undefined;
   }
+  // Track the latest metadata per collection so we can report an aggregate.
+  const fromCacheByKey = new Map<CollectionKey, boolean>();
+  const pendingByKey = new Map<CollectionKey, boolean>();
+
+  const emitStatus = () => {
+    if (!onStatus) {
+      return;
+    }
+    const fromCache = Array.from(fromCacheByKey.values()).some(Boolean);
+    const hasPendingWrites = Array.from(pendingByKey.values()).some(Boolean);
+    onStatus({ fromCache, hasPendingWrites });
+  };
+
   const unsubs = COLLECTIONS.map((key) =>
-    onSnapshot(collection(db!, key), (snapshot) => {
-      const incoming = snapshot.docs.map((d) => d.data() as Syncable);
-      mergeCollection<Syncable>(key, incoming);
-      onChange();
-    }),
+    onSnapshot(
+      collection(db!, key),
+      { includeMetadataChanges: true },
+      (snapshot) => {
+        const incoming = snapshot.docs.map((d) => d.data() as Syncable);
+        mergeCollection<Syncable>(key, incoming);
+        fromCacheByKey.set(key, snapshot.metadata.fromCache);
+        pendingByKey.set(key, snapshot.metadata.hasPendingWrites);
+        onChange();
+        emitStatus();
+      },
+    ),
   );
   return () => unsubs.forEach((unsub) => unsub());
 }

@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useAppStore } from './store/AppStore';
 import { resolveAppName, resolveLogoSrc } from './data/settings';
+import SyncStatusBadge from './components/SyncStatusBadge';
 
 // Screens are code-split so the initial bundle stays small and the app opens
 // fast. Heavy dependencies (e.g. recharts used by Dashboard/Estimation) are now
@@ -46,7 +47,14 @@ export default function App() {
             {item.label}
           </NavLink>
         ))}
+        <div className="sidebar-footer">
+          <SyncStatusBadge />
+        </div>
       </aside>
+
+      <div className="mobile-status">
+        <SyncStatusBadge />
+      </div>
 
       <main className="main">
         <Suspense

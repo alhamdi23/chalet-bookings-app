@@ -85,6 +85,70 @@ button {
   border-radius: 8px;
 }
 
+/* ---------- Sync status badge ---------- */
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.sync-badge-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.sync-badge-live .sync-badge-dot {
+  background: #2f9e44;
+}
+.sync-badge-live .sync-badge-label {
+  color: #2f7a3a;
+}
+
+.sync-badge-syncing .sync-badge-dot,
+.sync-badge-connecting .sync-badge-dot {
+  background: #d99a1c;
+  animation: sync-pulse 1.1s ease-in-out infinite;
+}
+
+.sync-badge-offline .sync-badge-dot {
+  background: var(--danger);
+}
+.sync-badge-offline .sync-badge-label {
+  color: var(--danger);
+}
+
+@keyframes sync-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Pin the badge to the bottom of the sidebar on desktop. */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 10px 4px 2px;
+}
+
+/* Floating badge for mobile (the sidebar is hidden there). */
+.mobile-status {
+  display: none;
+}
+
 .nav-link {
   display: flex;
   align-items: center;
@@ -1131,6 +1195,22 @@ button {
 
   .main {
     padding: calc(14px + env(safe-area-inset-top)) 14px 92px;
+  }
+
+  /* Show the sync badge as a small floating pill at the top on mobile. */
+  .mobile-status {
+    display: flex;
+    position: fixed;
+    top: calc(8px + env(safe-area-inset-top));
+    right: 10px;
+    z-index: 45;
+  }
+
+  .mobile-status .sync-badge {
+    box-shadow: var(--shadow);
+    background: var(--surface);
+    padding: 5px 10px;
+    font-size: 11.5px;
   }
 
   /* Prevent iOS auto-zoom on focus (needs >= 16px) and grow touch targets */

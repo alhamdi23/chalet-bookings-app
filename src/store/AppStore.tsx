@@ -22,8 +22,25 @@ import {
   pushWeekdayPricing,
   subscribeAll,
   subscribeWeekdayPricing,
+  type SyncSnapshotStatus,
 } from '../data/firestoreSync';
 import { newId, nowIso } from '../utils/id';
+
+/**
+ * Coarse connection/sync state surfaced to the UI:
+ *  - `local`      cloud is not configured; the app runs purely on this device.
+ *  - `offline`    no network connection; changes are saved locally and queued.
+ *  - `connecting` online, but the live server data has not arrived yet (we are
+ *                 currently showing the cached/local copy).
+ *  - `syncing`    online and connected, but local writes are still being sent.
+ *  - `live`       online, connected, and fully in sync with the server.
+ */
+export type ConnectionStatus =
+  | 'local'
+  | 'offline'
+  | 'connecting'
+  | 'syncing'
+  | 'live';
 
 const DEFAULT_COST_TYPE_NAMES = [
   'Water Bill',
@@ -43,6 +60,10 @@ interface AppStoreValue {
   settings: AppSettings;
   syncing: boolean;
   syncMessage: string | null;
+  /** Coarse online/offline + sync state for the status badge. */
+  connectionStatus: ConnectionStatus;
+  /** True while local changes are still queued to be sent to the server. */
+  pendingWrites: boolean;
 
   addBooking: (data: NewBooking) => void;
   updateBooking: (id: string, data: NewBooking) => void;
@@ -101,6 +122,13 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AppSettings>(loadSettings());
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  // navigator.onLine, kept in sync via window 'online'/'offline' events.
+  const [online, setOnline] = useState<boolean>(() =>
+    typeof navigator === 'undefined' ? true : navigator.onLine,
+  );
+  // Latest aggregate metadata from the live Firestore listener (null until the
+  // first snapshot arrives).
+  const [syncStatus, setSyncStatus] = useState<SyncSnapshotStatus | null>(null);
 
   const refresh = useCallback(() => {
     setBookings(repo.list<Booking>('bookings').map(normalizeBooking));
@@ -112,8 +140,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     seedCostTypesIfEmpty();
     refresh();
     // Real-time cloud subscription: merges remote changes into local cache and
-    // refreshes the UI. Returns an unsubscribe handler.
-    const unsubscribe = subscribeAll(refresh);
+    // refreshes the UI. The second callback reports connection/sync metadata so
+    // the status badge can tell the user whether data is live, cached, or still
+    // syncing. Returns an unsubscribe handler.
+    const unsubscribe = subscribeAll(refresh, setSyncStatus);
     // Shared weekday pricing: apply the remote value when it's newer than the
     // local copy (last-write-wins), so all users stay in sync.
     const unsubscribePricing = subscribeWeekdayPricing((remote) => {
@@ -324,15 +354,35 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     }
   }, [settings, refresh]);
 
-  // Auto-sync once on load when cloud is configured and online. Real-time
-  // listeners keep things in sync afterwards.
+  // Track the browser's online/offline state. Firestore's own listener handles
+  // reconnecting and flushing queued writes automatically; this just drives the
+  // status badge so the user gets immediate feedback when the link drops or
+  // returns. We intentionally do NOT run a heavy full sync on load anymore — the
+  // app opens instantly from localStorage and the real-time listener streams in
+  // live data in the background. A manual "Force Sync Now" button remains.
   useEffect(() => {
-    if (settings.autoSync && cloudEnabled && navigator.onLine) {
-      void runSync();
-    }
-    // Intentionally run once on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const goOnline = () => setOnline(true);
+    const goOffline = () => setOnline(false);
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
   }, []);
+
+  // Derive the coarse status shown in the UI from the network state and the
+  // latest live-listener metadata.
+  const pendingWrites = syncStatus?.hasPendingWrites ?? false;
+  const connectionStatus: ConnectionStatus = !cloudEnabled
+    ? 'local'
+    : !online
+      ? 'offline'
+      : syncStatus === null || syncStatus.fromCache
+        ? 'connecting'
+        : syncStatus.hasPendingWrites
+          ? 'syncing'
+          : 'live';
 
   const value = useMemo<AppStoreValue>(
     () => ({
@@ -342,6 +392,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       settings,
       syncing,
       syncMessage,
+      connectionStatus,
+      pendingWrites,
       addBooking,
       updateBooking,
       deleteBooking,
@@ -361,6 +413,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       settings,
       syncing,
       syncMessage,
+      connectionStatus,
+      pendingWrites,
       addBooking,
       updateBooking,
       deleteBooking,

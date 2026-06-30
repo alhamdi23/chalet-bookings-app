@@ -154,9 +154,11 @@ export default function SettingsScreen() {
 
         {cloudEnabled ? (
           <p className="kpi-sub" style={{ marginBottom: 16 }}>
-            Real-time cloud sync is <strong>active</strong>. Bookings and costs sync
-            automatically across all your devices — no button needed. The app also
-            works offline and syncs when the connection returns.
+            Real-time cloud sync is <strong>active</strong>. The app opens
+            instantly from data saved on this device, then loads the latest from
+            the server in the background and keeps every device in sync — no
+            button needed. It also works fully offline and syncs automatically
+            when the connection returns. The status badge shows the current state.
           </p>
         ) : (
           <p className="kpi-sub" style={{ marginBottom: 16 }}>
@@ -166,18 +168,6 @@ export default function SettingsScreen() {
             redeploy. Setup steps are in that file.
           </p>
         )}
-
-        <div className="toggle-row" style={{ marginBottom: 18 }}>
-          <input
-            id="autoSync"
-            type="checkbox"
-            checked={settings.autoSync}
-            onChange={(event) =>
-              updateSettings({ ...settings, autoSync: event.target.checked })
-            }
-          />
-          <label htmlFor="autoSync">Full sync when the app opens (if online)</label>
-        </div>
 
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <button
