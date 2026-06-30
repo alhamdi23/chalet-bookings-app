@@ -6,4 +6,18 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: './',
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        // Split big, rarely-changing dependencies into their own content-hashed
+        // chunks. This keeps the initial bundle small (faster startup) and lets
+        // the browser cache these vendors across deploys.
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+          recharts: ['recharts'],
+        },
+      },
+    },
+  },
 });

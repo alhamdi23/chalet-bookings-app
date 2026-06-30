@@ -5,7 +5,7 @@
 //  - Other GET requests (assets): stale-while-revalidate.
 // Sync calls to Google Apps Script are cross-origin POST/GET and bypass caching.
 
-const CACHE = 'chalet-cache-v1';
+const CACHE = 'chalet-cache-v2';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './favicon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -44,6 +44,26 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => caches.match('./index.html').then((cached) => cached || caches.match('./'))),
+    );
+    return;
+  }
+
+  // Hashed build assets (/assets/*) are immutable — their filename changes when
+  // the content changes. Serve them cache-first so repeat opens are instant.
+  if (url.pathname.includes('/assets/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) {
+          return cached;
+        }
+        return fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        });
+      }),
     );
     return;
   }

@@ -1,12 +1,21 @@
+import { Suspense, lazy } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import CalendarScreen from './screens/Calendar/CalendarScreen';
-import AvailabilityScreen from './screens/Availability/AvailabilityScreen';
-import CostsScreen from './screens/Costs/CostsScreen';
-import DashboardScreen from './screens/Dashboard/DashboardScreen';
-import EstimationScreen from './screens/Estimation/EstimationScreen';
-import SettingsScreen from './screens/Settings/SettingsScreen';
 import { useAppStore } from './store/AppStore';
 import { resolveAppName, resolveLogoSrc } from './data/settings';
+
+// Screens are code-split so the initial bundle stays small and the app opens
+// fast. Heavy dependencies (e.g. recharts used by Dashboard/Estimation) are now
+// only downloaded when the user actually navigates to that screen.
+const CalendarScreen = lazy(() => import('./screens/Calendar/CalendarScreen'));
+const AvailabilityScreen = lazy(
+  () => import('./screens/Availability/AvailabilityScreen'),
+);
+const CostsScreen = lazy(() => import('./screens/Costs/CostsScreen'));
+const DashboardScreen = lazy(() => import('./screens/Dashboard/DashboardScreen'));
+const EstimationScreen = lazy(
+  () => import('./screens/Estimation/EstimationScreen'),
+);
+const SettingsScreen = lazy(() => import('./screens/Settings/SettingsScreen'));
 
 const NAV_ITEMS = [
   { to: '/calendar', label: 'Calendar', icon: '📅' },
@@ -40,16 +49,20 @@ export default function App() {
       </aside>
 
       <main className="main">
-        <Routes>
-          <Route path="/" element={<Navigate to="/calendar" replace />} />
-          <Route path="/calendar" element={<CalendarScreen />} />
-          <Route path="/availability" element={<AvailabilityScreen />} />
-          <Route path="/costs" element={<CostsScreen />} />
-          <Route path="/dashboard" element={<DashboardScreen />} />
-          <Route path="/estimation" element={<EstimationScreen />} />
-          <Route path="/settings" element={<SettingsScreen />} />
-          <Route path="*" element={<Navigate to="/calendar" replace />} />
-        </Routes>
+        <Suspense
+          fallback={<div className="screen-loading">Loading…</div>}
+        >
+          <Routes>
+            <Route path="/" element={<Navigate to="/calendar" replace />} />
+            <Route path="/calendar" element={<CalendarScreen />} />
+            <Route path="/availability" element={<AvailabilityScreen />} />
+            <Route path="/costs" element={<CostsScreen />} />
+            <Route path="/dashboard" element={<DashboardScreen />} />
+            <Route path="/estimation" element={<EstimationScreen />} />
+            <Route path="/settings" element={<SettingsScreen />} />
+            <Route path="*" element={<Navigate to="/calendar" replace />} />
+          </Routes>
+        </Suspense>
       </main>
 
       <nav className="bottom-nav">
